@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->string('length')->nullable();
             $table->json('weekday');
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }

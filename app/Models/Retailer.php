@@ -69,4 +69,9 @@ class Retailer extends Model
     {
         return $this->belongsTo(House::class);
     }
+
+    public function routes(): BelongsTo
+    {
+        return $this->belongsTo(Route::class);
+    }
 }

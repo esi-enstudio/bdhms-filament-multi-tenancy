@@ -80,4 +80,9 @@ class House extends Model
         return $this->hasMany(Rso::class);
     }
 
+    public function retailers(): HasMany
+    {
+        return $this->hasMany(Retailer::class);
+    }
+
 }

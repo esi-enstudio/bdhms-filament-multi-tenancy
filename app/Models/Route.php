@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
@@ -14,12 +15,21 @@ class Route extends Model
 
     protected $fillable = [
         'slug',
+        'house_id',
         'code',
         'name',
         'description',
         'length',
         'weekday',
+        'status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'weekday' => 'array',
+        ];
+    }
 
     /**
      * @return SlugOptions
@@ -45,5 +55,10 @@ class Route extends Model
     public function house(): BelongsTo
     {
         return $this->belongsTo(House::class);
+    }
+
+    public function retailers(): HasMany
+    {
+        return $this->hasMany(Retailer::class);
     }
 }

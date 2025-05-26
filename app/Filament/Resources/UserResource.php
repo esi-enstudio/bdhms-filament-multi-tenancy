@@ -6,6 +6,7 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\House;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -16,6 +17,7 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -109,6 +111,7 @@ class UserResource extends Resource
                         Forms\Components\Section::make('Roles')
                             ->schema([
                                 Forms\Components\Select::make('roles')
+                                    ->label('')
                                     ->relationship('roles', 'name')
                                     ->saveRelationshipsUsing(function (Model $record, $state) {
                                         $record->roles()->syncWithPivotValues($state, [config('permission.column_names.team_foreign_key') => getPermissionsTeamId()]);
@@ -117,10 +120,29 @@ class UserResource extends Resource
                                     ->preload()
                                     ->searchable(),
                                 ]),
+
+                        Forms\Components\Section::make('Attached Houses')
+                            ->schema([
+                                Select::make('houses')
+                                    ->relationship('house', 'code') // Make sure a User model has `houses()` relationship
+                                    ->multiple()
+                                    ->preload()
+                                    ->searchable()
+                                    ->label('Attached Houses')
+                                    ->saveRelationshipsUsing(function ($record, $state) {
+                                        // If no houses are selected, attach the current tenant's house
+                                        $houseIds = empty($state) ? [Filament::getTenant()->id] : $state;
+
+                                        $record->house()->sync($houseIds);
+                                    })
+                            ]),
                     ]),
             ]);
     }
 
+    /**
+     * @throws \Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -132,8 +154,22 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone_number')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('house.code')->badge(),
-                Tables\Columns\TextColumn::make('roles.name')->badge(),
+                Tables\Columns\TextColumn::make('house.code')
+                    ->badge()
+                    ->color('warning'),
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => Str::title($state))
+                    ->color('danger'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state) => match ($state) {
+                        'active' => 'success',
+                        'inactive' => 'danger',
+                        default => 'warning',
+                    })
+                    ->formatStateUsing(fn ($state) => Str::title($state))
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
