@@ -23,6 +23,7 @@ use Spatie\Sluggable\SlugOptions;
  * @method static where(string $string, string $slug)
  * @method static updateOrCreate(array|string[] $array, array $array1)
  * @method static find(mixed $userId)
+ * @method static firstWhere(string $string, $value)
  * @property mixed $houses
  */
 class User extends Authenticatable implements HasTenants
@@ -68,7 +69,7 @@ class User extends Authenticatable implements HasTenants
         ];
     }
 
-    public function houses(): BelongsToMany
+    public function house(): BelongsToMany
     {
         return $this->belongsToMany(House::class)->withTimestamps();
     }
@@ -94,15 +95,13 @@ class User extends Authenticatable implements HasTenants
         return 'slug'; // Use slug instead of id in routes
     }
 
-
-
     public function getTenants(Panel $panel): Collection
     {
-        return $this->houses;
+        return $this->house;
     }
 
     public function canAccessTenant(Model $tenant): bool
     {
-        return $this->houses()->whereKey($tenant)->exists();
+        return $this->house()->whereKey($tenant)->exists();
     }
 }

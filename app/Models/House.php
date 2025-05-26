@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
@@ -13,6 +14,7 @@ use Spatie\Sluggable\SlugOptions;
  * @method static find($id)
  * @method static where(string $string, string $string1)
  * @method static insert(array[] $array)
+ * @method static create(array|mixed[] $data)
  */
 class House extends Model
 {
@@ -61,6 +63,21 @@ class House extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
+    public function routes(): HasMany
+    {
+        return $this->hasMany(Route::class);
+    }
+
+    public function roles(): HasMany
+    {
+        return $this->hasMany(\Spatie\Permission\Models\Role::class);
+    }
+
+    public function rsos(): HasMany
+    {
+        return $this->hasMany(Rso::class);
     }
 
 }
