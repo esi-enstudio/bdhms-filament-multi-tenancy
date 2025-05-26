@@ -85,4 +85,9 @@ class House extends Model
         return $this->hasMany(Retailer::class);
     }
 
+    public function bts(): HasMany
+    {
+        return $this->hasMany(Bts::class);
+    }
+
 }

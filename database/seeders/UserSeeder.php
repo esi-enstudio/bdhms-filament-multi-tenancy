@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
-class UserSeeder extends Seeder
+class
+UserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
