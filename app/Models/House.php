@@ -90,4 +90,9 @@ class House extends Model
         return $this->hasMany(ItopupReplace::class);
     }
 
+    public function commission(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
+
 }
