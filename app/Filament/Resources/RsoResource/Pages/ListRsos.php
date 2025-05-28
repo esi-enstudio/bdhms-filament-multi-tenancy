@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\RsoResource\Pages;
 
 use App\Filament\Resources\RsoResource;
+use App\Imports\RsoImport;
 use App\Models\User;
+use EightyNine\ExcelImport\ExcelImportAction;
 use Filament\Actions;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 use Konnco\FilamentImport\Actions\ImportAction;
 use Konnco\FilamentImport\Actions\ImportField;
@@ -19,124 +22,59 @@ class ListRsos extends ListRecords
         return [
             Actions\CreateAction::make()->icon('heroicon-s-plus'),
 
-            ImportAction::make()
-                ->icon('heroicon-s-arrow-down-tray')
-                ->fields([
-                    ImportField::make('house_id')
-                        ->label('DD House')
-                        ->required()
-                        ->mutateBeforeCreate(fn() => Filament::getTenant()?->id)
-                        ->rules(['required']),
-
-                    ImportField::make('user_id')
-                        ->mutateBeforeCreate(fn($value) => User::firstWhere('phone_number', $value)?->id)
-                        ->rules(['required','exists:users,id'])
-                        ->label('Assign User'),
-
-                    ImportField::make('supervisor_id')
-                        ->mutateBeforeCreate(fn($value) => User::firstWhere('phone_number', $value)?->id)
-                        ->rules(['required','exists:users,id'])
-                        ->label('Assign Supervisor'),
-
-                    ImportField::make('osrm_code'),
-
-                    ImportField::make('employee_code'),
-
-                    ImportField::make('rso_code')
-                        ->required(),
-
-                    ImportField::make('itop_number')
-                        ->required(),
-
-                    ImportField::make('pool_number')
-                        ->required(),
-
-                    ImportField::make('personal_number')
-                        ->required(),
-
-                    ImportField::make('name_as_bank_account')
-                        ->label('Name of bank account'),
-
-                    ImportField::make('religion'),
-
-                    ImportField::make('bank_name'),
-
-                    ImportField::make('bank_account_number'),
-
-                    ImportField::make('brunch_name'),
-
-                    ImportField::make('routing_number'),
-
-                    ImportField::make('education'),
-
-                    ImportField::make('blood_group'),
-
-                    ImportField::make('gender'),
-
-                    ImportField::make('present_address'),
-
-                    ImportField::make('permanent_address'),
-
-                    ImportField::make('father_name'),
-
-                    ImportField::make('mother_name'),
-
-                    ImportField::make('market_type'),
-
-                    ImportField::make('salary'),
-
-                    ImportField::make('category'),
-
-                    ImportField::make('agency_name'),
-
-                    ImportField::make('dob')
-                        ->rules('date')
-                        ->mutateBeforeCreate(function ($value) {
-                            // Check if the value is a numeric Excel serial date
-                            if (is_numeric($value)) {
-                                try {
-                                    // Convert Excel serial date to a DateTime object
-                                    $excelBaseDate = new \DateTime('1899-12-30'); // Excel's base date (adjusted for MySQL)
-                                    $excelBaseDate->modify("+$value days");
-                                    return $excelBaseDate->format('Y-m-d'); // Return in MySQL date format
-                                } catch (\Exception $e) {
-                                    throw new \Exception("Invalid date format for DOB: {$value}");
-                                }
-                            }
-                            // If the value is already in a valid date format (e.g., YYYY-MM-DD), return it
-                            return $value;
-                        }),
-
-                    ImportField::make('nid'),
-
-                    ImportField::make('division'),
-
-                    ImportField::make('district'),
-
-                    ImportField::make('thana'),
-
-                    ImportField::make('sr_no'),
-
-                    ImportField::make('joining_date')
-                        ->required()
-                        ->rules('date')
-                        ->mutateBeforeCreate(function ($value) {
-                            // Check if the value is a numeric Excel serial date
-                            if (is_numeric($value)) {
-                                try {
-                                    // Convert Excel serial date to a DateTime object
-                                    $excelBaseDate = new \DateTime('1899-12-30'); // Excel's base date (adjusted for MySQL)
-                                    $excelBaseDate->modify("+$value days");
-                                    return $excelBaseDate->format('Y-m-d'); // Return in MySQL date format
-                                } catch (\Exception $e) {
-                                    throw new \Exception("Invalid date format for DOB: {$value}");
-                                }
-                            }
-                            // If the value is already in a valid date format (e.g., YYYY-MM-DD), return it
-                            return $value;
-                        }),
-
-                ], columns:4)
+            ExcelImportAction::make()
+                ->slideOver()
+                ->color("primary")
+                ->use(RsoImport::class)
+                ->validateUsing([
+                    'user_number' => ['required'],
+                    'supervisor_number' => ['required'],
+                    'rso_code' => ['required'],
+                    'itop_number' => ['required'],
+                    'pool_number' => ['required'],
+                ])
+                ->sampleExcel(
+                    sampleData: [
+                        'DD Code'               => 'MYMVAI01',
+                        'User Number'           => '01711000001',
+                        'Supervisor Number'     => '01923909896',
+                        'OSRM Code'             => 'IMS0028073',
+                        'Employee Code'         => 'MOS546',
+                        'Rso Code'              => 'RS042015',
+                        'Itop Number'           => '01409944001',
+                        'Pool Number'           => '01935593311',
+                        'Personal Number'       => '01611000001',
+                        'Name as Bank Account'  => 'Safiqul Islam',
+                        'Religion'              => 'Islam',
+                        'Bank Name'             => 'DBBL Core',
+                        'Bank Account Number'   => '173XXXXXXX121',
+                        'Brunch Name'           => 'BHAIRAB BRANCH',
+                        'Routing Number'        => '090480193',
+                        'Education'             => 'SSC',
+                        'Blood Group'           => 'O+',
+                        'Gender'                => 'male',
+                        'Present Address'       => 'Bhairabpur, Bhairab, Kishoreganj.',
+                        'Permanent Address'     => 'Bhairabpur, Bhairab, Kishoreganj.',
+                        'Father Name'           => 'Mamun Mia',
+                        'Mother Name'           => 'Momena Khatun',
+                        'Market Type'           => 'HLPV',
+                        'Salary'                => '8500',
+                        'Category'              => 'Existing',
+                        'Agency Name'           => 'IMS',
+                        'DOB'                   => '10-10-2001',
+                        'NID'                   => '7804723877',
+                        'Division'              => 'Dhaka',
+                        'District'              => 'Kishoreganj',
+                        'Thana'                 => 'Bhairab',
+                        'SR_NO'                 => 'SR-23',
+                        'Joining Date'          => '01-08-2024',
+                    ],
+                    fileName: 'rso-sample.xlsx',
+//                    exportClass: ,
+                    sampleButtonLabel: 'Download Sample',
+                    customiseActionUsing: fn(Action $action) => $action->color('danger')
+                        ->icon('heroicon-m-clipboard'),
+                ),
         ];
     }
 }

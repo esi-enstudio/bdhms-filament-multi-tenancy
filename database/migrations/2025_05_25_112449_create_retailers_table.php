@@ -22,7 +22,7 @@ return new class extends Migration
             $table->id();
             $table->string('slug');
             $table->foreignIdFor(House::class);
-            $table->foreignIdFor(Rso::class)->nullable();
+            $table->foreignIdFor(Rso::class);
             $table->foreignIdFor(User::class)->nullable();
             $table->foreignIdFor(Rso::class, 'is_rso_code')->nullable();
             $table->foreignIdFor(Bp::class, 'is_bp_code')->nullable();
@@ -30,8 +30,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('type')->default('telecom');
             $table->string('enabled')->default('Y');
-            $table->string('sso')->nullable();
-            $table->string('itop_number')->unique()->index()->nullable();
+            $table->string('sso')->default('Y');
+            $table->string('itop_number')->unique()->index();
             $table->string('service_point')->nullable();
             $table->string('category')->nullable();
             $table->string('owner_name')->nullable();
@@ -49,14 +49,6 @@ return new class extends Migration
             $table->string('remarks')->nullable();
             $table->json('others_operator')->nullable();
             $table->string('document')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('bts_retailer_route', function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(Bts::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Retailer::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Route::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

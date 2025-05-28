@@ -4,30 +4,36 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
-class Route extends Model
+class ItopupReplace extends Model
 {
     use HasSlug;
 
     protected $fillable = [
         'slug',
         'house_id',
-        'code',
-        'name',
-        'description',
-        'length',
-        'weekday',
+        'user_id',
+        'retailer_id',
+        'sim_serial',
+        'balance',
+        'reason',
         'status',
+        'remarks',
+        'completed_at',
     ];
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
-            'weekday' => 'array',
+            'completed_at' => 'datetime',
         ];
     }
 
@@ -57,8 +63,13 @@ class Route extends Model
         return $this->belongsTo(House::class);
     }
 
-    public function retailers(): HasMany
+    public function user(): BelongsTo
     {
-        return $this->hasMany(Retailer::class);
+        return $this->belongsTo(User::class);
+    }
+
+    public function retailer(): BelongsTo
+    {
+        return $this->belongsTo(Retailer::class);
     }
 }

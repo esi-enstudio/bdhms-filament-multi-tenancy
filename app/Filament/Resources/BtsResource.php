@@ -41,6 +41,12 @@ class BtsResource extends Resource
                 Forms\Components\TextInput::make('division')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('region')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('cluster')
+                    ->required()
+                    ->maxLength(255),
                 Forms\Components\TextInput::make('bts_address')
                     ->required(),
                 Forms\Components\TextInput::make('urban_rural')
@@ -85,6 +91,10 @@ class BtsResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('division')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('region')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('cluster')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('urban_rural')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('longitude')
@@ -117,6 +127,7 @@ class BtsResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultPaginationPageOption(5)
             ->filters([
                 //
             ])
@@ -144,5 +155,10 @@ class BtsResource extends Resource
 //            'create' => Pages\CreateBts::route('/create'),
 //            'edit' => Pages\EditBts::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->latest('created_at');
     }
 }

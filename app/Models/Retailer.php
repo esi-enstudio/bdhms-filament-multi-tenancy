@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
+/**
+ * @method static whereNotNull(string $string)
+ */
 class Retailer extends Model
 {
     use HasSlug;
@@ -70,8 +74,13 @@ class Retailer extends Model
         return $this->belongsTo(House::class);
     }
 
-    public function routes(): BelongsTo
+    public function rso(): BelongsTo
     {
-        return $this->belongsTo(Route::class);
+        return $this->belongsTo(Rso::class);
+    }
+
+    public function itopupReplace(): HasMany
+    {
+        return $this->hasMany(ItopupReplace::class);
     }
 }

@@ -21,6 +21,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class RsoResource extends Resource
@@ -33,14 +34,6 @@ class RsoResource extends Resource
     {
         return $form
             ->schema([
-                // house_id is now hidden & auto-set from the current tenant
-                Select::make('house_id')
-                    ->label('House')
-                    ->default(fn () => Filament::getTenant()?->id)
-                    ->disabled()
-                    ->hidden()
-                    ->required(),
-
                 Select::make('user_id')
                     ->label('User')
                     ->options(function (Get $get) {
@@ -71,7 +64,6 @@ class RsoResource extends Resource
                     ->preload()
                     ->searchable()
                     ->disabled(fn () => request()->routeIs('filament.superadmin.resources.rsos.edit')),
-
 
                 Select::make('supervisor_id')
                     ->label('Supervisor')
@@ -271,6 +263,7 @@ class RsoResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -293,5 +286,24 @@ class RsoResource extends Resource
 //            'create' => Pages\CreateRso::route('/create'),
 //            'edit' => Pages\EditRso::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        $user = Auth::user();
+        $rsoIds = Rso::where('supervisor_id', $user->id)->pluck('id');
+
+        return match (true)
+        {
+            $user->hasRole('super_admin') => $query->latest('created_at'),
+
+            $user->hasRole('rso') => $query->where('user_id', $user->id)->latest('created_at'),
+
+            $user->hasRole('supervisor') => $query->where('supervisor_id', $user->id)->latest('created_at')->orderBy('user_id'),
+
+            default => $query->whereRaw('0=1'),
+        };
     }
 }

@@ -21,6 +21,8 @@ class Bts extends Model
         'thana',
         'district',
         'division',
+        'region',
+        'cluster',
         'bts_address',
         'urban_rural',
         'longitude',
@@ -31,10 +33,6 @@ class Bts extends Model
         '3g_onair_date',
         '4g_onair_date',
         'priority',
-        'site_id',
-        'bts_code',
-        'district',
-        'division',
     ];
 
     /**

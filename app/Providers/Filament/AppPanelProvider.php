@@ -7,6 +7,7 @@ use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Filament\Pages\Tenancy\RegisterHouse;
 use App\Models\House;
+use Exception;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -25,6 +26,9 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AppPanelProvider extends PanelProvider
 {
+    /**
+     * @throws Exception
+     */
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -81,8 +85,6 @@ class AppPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->tenant(House::class, slugAttribute: 'slug', ownershipRelationship: 'house')
-            ->tenantRegistration(RegisterHouse::class)
-            ->tenantProfile(EditHouseProfile::class)
             ->spa();
     }
 }

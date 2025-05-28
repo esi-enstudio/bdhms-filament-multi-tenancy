@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('thana');
             $table->string('district');
             $table->string('division');
+            $table->string('region');
+            $table->string('cluster');
             $table->text('bts_address');
             $table->string('urban_rural');
 

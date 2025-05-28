@@ -3,8 +3,11 @@
 namespace App\Filament\Resources\BtsResource\Pages;
 
 use App\Filament\Resources\BtsResource;
+use App\Imports\BtsImport;
+use EightyNine\ExcelImport\ExcelImportAction;
 use Filament\Actions;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 use Konnco\FilamentImport\Actions\ImportAction;
 use Konnco\FilamentImport\Actions\ImportField;
@@ -20,28 +23,54 @@ class ListBts extends ListRecords
                 ->label('Add New')
                 ->icon('heroicon-s-plus'),
 
-            ImportAction::make()
-                ->icon('heroicon-s-arrow-down-tray')
-                ->fields([
-                    ImportField::make('house_id')
-                        ->label('DD House')
-                        ->mutateBeforeCreate(fn($value) => Filament::getTenant()?->id),
-
-                    ImportField::make('code'),
-
-                    ImportField::make('name'),
-
-                    ImportField::make('description'),
-
-                    ImportField::make('length'),
-
-                    ImportField::make('weekday')
-                        ->label('Serving Days (e.g., Sat,Sun,Mon)')
-                        ->mutateBeforeCreate(function ($value) {
-                            return array_map('trim', explode(',', $value));
-                        })
-
-                ], columns:2)
+            ExcelImportAction::make()
+                ->slideOver()
+                ->color("primary")
+                ->use(BtsImport::class)
+                ->validateUsing([
+                    'site_id' => ['required'],
+                    'bts_code' => ['required'],
+                    'site_type' => ['required'],
+                    'thana' => ['required'],
+                    'district' => ['required'],
+                    'division' => ['required'],
+                    'region' => ['required'],
+                    'cluster' => ['required'],
+                    'bts_address' => ['required'],
+                    'urbanrural' => ['required'],
+                    'longitude' => ['required'],
+                    'latitude' => ['required'],
+                    'network_mode' => ['required'],
+                    'priority' => ['required'],
+                ])
+                ->sampleExcel(
+                    sampleData: [
+                        'DD Code' => 'MYMVAI01',
+                        'Site ID' => 'DHK_L0504',
+                        'BTS Code' => 'DHK0504',
+                        'Site Type' => 'Macro',
+                        'Thana' => 'Bajitpur',
+                        'District' => 'Kishoreganj',
+                        'Division' => 'Dhaka',
+                        'Region' => 'Brahmanbaria',
+                        'Cluster' => 'East Cluster',
+                        'BTS Address' => 'Murshiduddin Hall, Bajitpur Medical College, Bajitpur, Kishoreganj.',
+                        'Urban/Rural' => 'Semi-urban',
+                        'Longitude' => '90.91705',
+                        'Latitude' => '24.20107',
+                        'Network Mode' => '2G+4G',
+                        'Archetype' => 'BL Core Markets',
+                        '2g On Air Date' => '25-12-2005',
+                        '3g On Air Date' => '',
+                        '4g On Air Date' => '24-06-2019',
+                        'Priority' => 'P1',
+                    ],
+                    fileName: 'bts-sample.xlsx',
+//                    exportClass: ,
+                    sampleButtonLabel: 'Download Sample',
+                    customiseActionUsing: fn(Action $action) => $action->color('danger')
+                        ->icon('heroicon-m-clipboard'),
+                ),
         ];
     }
 }

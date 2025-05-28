@@ -5,6 +5,7 @@ namespace App\Models;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
@@ -12,6 +13,9 @@ use Spatie\Sluggable\SlugOptions;
 /**
  * @method static create(array $rso)
  * @method static whereNotNull(string $string)
+ * @method static firstWhere(string $string, mixed $rso_number)
+ * @method static select(string $string)
+ * @method static where(string $string, $id)
  */
 class Rso extends Model
 {
@@ -103,5 +107,10 @@ class Rso extends Model
     public function supervisor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    public function retailer(): HasMany
+    {
+        return $this->hasMany(Retailer::class);
     }
 }

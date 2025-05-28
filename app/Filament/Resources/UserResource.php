@@ -23,6 +23,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -241,6 +242,12 @@ class UserResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->latest('created_at');
+        $query = parent::getEloquentQuery();
+
+        if (!Auth::user()->hasRole('super_admin')) {
+            $query->where('id', Auth::id());
+        }
+
+        return $query->latest('created_at');
     }
 }

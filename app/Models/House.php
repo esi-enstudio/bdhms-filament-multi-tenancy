@@ -65,11 +65,6 @@ class House extends Model
         return $this->belongsToMany(User::class)->withTimestamps();
     }
 
-    public function routes(): HasMany
-    {
-        return $this->hasMany(Route::class);
-    }
-
     public function roles(): HasMany
     {
         return $this->hasMany(\Spatie\Permission\Models\Role::class);
@@ -88,6 +83,11 @@ class House extends Model
     public function bts(): HasMany
     {
         return $this->hasMany(Bts::class);
+    }
+
+    public function itopupReplace(): HasMany
+    {
+        return $this->hasMany(ItopupReplace::class);
     }
 
 }
