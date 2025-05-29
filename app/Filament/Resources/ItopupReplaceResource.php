@@ -6,6 +6,8 @@ use App\Filament\Resources\ItopupReplaceResource\Pages;
 use App\Filament\Resources\ItopupReplaceResource\RelationManagers;
 use App\Models\ItopupReplace;
 use App\Models\Rso;
+use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
@@ -14,10 +16,13 @@ use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ItopupReplaceResource extends Resource
@@ -30,6 +35,9 @@ class ItopupReplaceResource extends Resource
     {
         return $form
             ->schema([
+                Hidden::make('user_id')
+                    ->default(fn () => Auth::id()),
+
                 Select::make('retailer_id')
                     ->label('Itop Number')
                     ->relationship('retailer', 'itop_number', function ($query) {
@@ -83,14 +91,12 @@ class ItopupReplaceResource extends Resource
                         'retailer_changed' => 'Retailer Changed',
                     ]),
 
+                TextInput::make('remarks')
+                    ->maxLength(255)
+                    ->visible(fn() => Auth::user()->hasRole('super_admin')),
+
                 Select::make('status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'processing' => 'Processing',
-                        'canceled' => 'Canceled',
-                        'complete' => 'Complete',
-                    ])
-                    ->default('pending')
+                    ->visible(fn(): bool => auth()->user()->hasAnyRole(['super_admin', 'admin']))
                     ->live()
                     ->afterStateUpdated(function ($state, Set $set){
                         // When status is set to 'complete', update completed_at to the current datetime
@@ -101,11 +107,12 @@ class ItopupReplaceResource extends Resource
                             $set('completed_at', null);
                         }
                     })
-                    ->visible(fn () => Auth::user()->hasRole('super_admin')), // Visible only for super_admin
-
-                TextInput::make('remarks')
-                    ->maxLength(255)
-                    ->visible(fn() => Auth::user()->hasRole('super_admin')),
+                    ->options([
+                        'pending' => 'Pending',
+                        'processing' => 'Processing',
+                        'canceled' => 'Canceled',
+                        'complete' => 'Complete',
+                    ]),
 
                 Hidden::make('completed_at'),
             ]);
@@ -115,28 +122,49 @@ class ItopupReplaceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('house.name')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('house.code'),
                 Tables\Columns\TextColumn::make('user.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('retailer.name')
-                    ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->label('Request By'),
+                Tables\Columns\TextColumn::make('retailer.itop_number')
+                    ->label('Itopup Number')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sim_serial')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('balance')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('reason')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
+                    ->formatStateUsing(fn($state) => Str::title($state)),
+
+                TextColumn::make('status')
+                    ->badge()
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => Str::title($state))
+                    ->color(function ($state){
+                        if ($state == "pending") {
+                            return 'secondary';
+                        }elseif ($state == "canceled")
+                        {
+                            return 'danger';
+                        }elseif ($state == "processing")
+                        {
+                            return 'warning';
+                        }elseif ($state == "complete")
+                        {
+                            return 'success';
+                        }
+
+                        return false;
+                    }),
+
                 Tables\Columns\TextColumn::make('remarks')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('completed_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->toFormattedDayDateString()),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -151,7 +179,22 @@ class ItopupReplaceResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+
+                Tables\Actions\Action::make('view_history')
+                    ->label('History')
+                    ->icon('heroicon-o-clock')
+                    ->url(fn ($record) => self::getUrl('history', ['record' => $record->id])),
+//                    ->openUrlInNewTab(), // যদি নতুন ট্যাবে খুলতে চান, অপশনাল
+
+                Tables\Actions\EditAction::make()
+                    ->authorize(function ($record){
+                    // সুপার অ্যাডমিন এবং অ্যাডমিনের জন্য শর্ত বাতিল
+                    if (auth()->user()->hasAnyRole(['super_admin', 'admin'])) {
+                        return true;
+                    }
+                    // সাধারণ ব্যবহারকারীরা শুধুমাত্র pending স্ট্যাটাসে এডিট করতে পারবে
+                    return $record->status === 'pending';
+                }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -173,6 +216,8 @@ class ItopupReplaceResource extends Resource
             'index' => Pages\ListItopupReplaces::route('/'),
 //            'create' => Pages\CreateItopupReplace::route('/create'),
 //            'edit' => Pages\EditItopupReplace::route('/{record}/edit'),
+            'history' => Pages\History::route('/{record}/history'),
+            'data' => Pages\Data::route('/{record}/data'),
         ];
     }
 

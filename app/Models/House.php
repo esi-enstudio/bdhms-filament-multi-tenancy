@@ -85,7 +85,7 @@ class House extends Model
         return $this->hasMany(Bts::class);
     }
 
-    public function itopupReplace(): HasMany
+    public function itopupReplaces(): HasMany
     {
         return $this->hasMany(ItopupReplace::class);
     }
@@ -94,5 +94,4 @@ class House extends Model
     {
         return $this->hasMany(Commission::class);
     }
-
 }

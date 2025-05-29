@@ -16,6 +16,7 @@ return new class extends Migration
     {
         Schema::create('itopup_replaces', function (Blueprint $table) {
             $table->id();
+            $table->string('slug')->unique();
             $table->foreignIdFor(House::class);
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(Retailer::class);

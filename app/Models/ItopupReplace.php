@@ -8,6 +8,10 @@ use Illuminate\Support\Str;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
+/**
+ * @method static where(string $string, $itopup_number)
+ * @method static findOrFail($record)
+ */
 class ItopupReplace extends Model
 {
     use HasSlug;

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\RsoResource\Pages;
 
 use App\Filament\Resources\RsoResource;
 use App\Imports\RsoImport;
+use App\Models\Rso;
 use App\Models\User;
 use EightyNine\ExcelImport\ExcelImportAction;
 use Filament\Actions;
@@ -26,6 +27,7 @@ class ListRsos extends ListRecords
                 ->slideOver()
                 ->color("primary")
                 ->use(RsoImport::class)
+                ->authorize('import_rso')
                 ->validateUsing([
                     'user_number' => ['required'],
                     'supervisor_number' => ['required'],

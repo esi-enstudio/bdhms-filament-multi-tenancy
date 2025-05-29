@@ -59,11 +59,12 @@ class RetailerResource extends Resource
                     ->required()
                     ->preload()
                     ->searchable()
-                    ->disabled(fn () => request()->routeIs('filament.superadmin.resources.retailers.edit')),
+                    ->visible(fn(): bool => Auth::user()->hasAnyRole(['super_admin','admin']))
+                    ->disabledOn('edit'),
 
                 Select::make('rso_id')
                     ->label('Attach Rso')
-                    ->options(function (Get $get) {
+                    ->options(function () {
                         $houseId = Filament::getTenant()?->id;
 
                         return $houseId ? Rso::query()->whereHas('house', fn ($q) => $q->where('houses.id', $houseId))->where('status', 'active')->pluck('itop_number', 'id')->toArray() : '';
@@ -71,36 +72,47 @@ class RetailerResource extends Resource
                     ->required()
                     ->preload()
                     ->searchable()
-                    ->disabled(fn () => request()->routeIs('filament.superadmin.resources.retailers.edit')),
+                    ->visible(fn(): bool => Auth::user()->hasAnyRole(['super_admin','admin']))
+                    ->disabledOn('edit'),
 
                 Forms\Components\TextInput::make('code')
+                    ->disabled(fn() => !Auth::user()->hasAnyRole(['super_admin']))
                     ->maxLength(10),
                 Forms\Components\TextInput::make('name')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('type')
                     ->required()
-                    ->maxLength(255)
-                    ->default('telecom'),
-                Forms\Components\TextInput::make('enabled')
+                    ->disabled(fn() => !Auth::user()->hasAnyRole(['super_admin']))
+                    ->maxLength(255),
+                Forms\Components\Select::make('enabled')
                     ->required()
-                    ->maxLength(2)
+                    ->options([
+                        'Y' => 'Enable',
+                        'N' => 'Disable',
+                    ])
                     ->default('Y'),
-                Forms\Components\TextInput::make('sso')
-                    ->maxLength(2),
+                Forms\Components\Select::make('sso')
+                    ->options([
+                        'Y' => 'Enable',
+                        'N' => 'Disable',
+                    ]),
                 Forms\Components\TextInput::make('itop_number')
+                    ->numeric()
+                    ->disabled(fn() => !Auth::user()->hasAnyRole(['super_admin']))
                     ->maxLength(255),
                 Forms\Components\TextInput::make('service_point')
-                    ->maxLength(255),
+                    ->disabled(fn() => !Auth::user()->hasAnyRole(['super_admin'])),
                 Forms\Components\TextInput::make('category')
-                    ->maxLength(255),
+                    ->disabled(fn() => !Auth::user()->hasAnyRole(['super_admin'])),
                 Forms\Components\TextInput::make('owner_name')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('owner_number')
-                    ->maxLength(255),
+                    ->numeric()
+                    ->maxLength(11),
                 Forms\Components\TextInput::make('division')
-                    ->maxLength(255),
+                    ->disabled(fn() => !Auth::user()->hasAnyRole(['super_admin'])),
                 Forms\Components\TextInput::make('district')
-                    ->maxLength(255),
+                    ->disabled(fn() => !Auth::user()->hasAnyRole(['super_admin'])),
                 Forms\Components\TextInput::make('thana')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('address')
@@ -109,17 +121,25 @@ class RetailerResource extends Resource
                     ->numeric()
                     ->maxLength(17),
                 Forms\Components\DatePicker::make('dob')
-                    ->native(false),
+                    ->native(false)
+                    ->label('Date of Birth') // Added a label for clarity
+                    ->rules(['before_or_equal:today']), // Ensures the date is not greater than or equal to today
                 Forms\Components\TextInput::make('lat')
-                    ->numeric()
-                    ->maxLength(15),
+                    ->label('Latitude')
+                    ->rules(['numeric', 'min:-90', 'max:90']) // Latitude ranges from -90 to +90
+                    ->step('any') // Allows any decimal value to be entered
+                    ->extraInputAttributes(['step' => 'any']) // Ensures the HTML input element allows float steps
+                    ->numeric(),
                 Forms\Components\TextInput::make('long')
                     ->numeric()
-                    ->maxLength(15),
+                    ->label('Longitude')
+                    ->rules(['numeric', 'min:-180', 'max:180']) // Longitude ranges from -180 to +180
+                    ->step('any') // Allows any decimal value to be entered
+                    ->extraInputAttributes(['step' => 'any']), // Ensures the HTML input element allows float steps
                 Forms\Components\TextInput::make('bts_code')
-                    ->maxLength(10),
+                    ->disabled(fn() => !Auth::user()->hasAnyRole(['super_admin'])),
                 Forms\Components\Textarea::make('description')
-                    ->columnSpanFull(),
+                    ->disabled(fn() => !Auth::user()->hasAnyRole(['super_admin'])),
                 Forms\Components\TextInput::make('remarks')
                     ->maxLength(255),
             ]);

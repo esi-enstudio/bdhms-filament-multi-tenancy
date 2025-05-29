@@ -1,10 +1,7 @@
 <?php
 
 use App\Models\Bp;
-use App\Models\Bts;
 use App\Models\House;
-use App\Models\Retailer;
-use App\Models\Route;
 use App\Models\Rso;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
@@ -20,7 +17,7 @@ return new class extends Migration
     {
         Schema::create('retailers', function (Blueprint $table) {
             $table->id();
-            $table->string('slug');
+            $table->string('slug')->unique();
             $table->foreignIdFor(House::class);
             $table->foreignIdFor(Rso::class);
             $table->foreignIdFor(User::class)->nullable();
