@@ -23,9 +23,9 @@ class RsoImport implements ToModel, WithHeadingRow
             : (!empty($value) ? Carbon::parse($value)->format('Y-m-d') : null);
 
         return new Rso([
-            'house_id'          => Filament::getTenant()->id,
-            'user_id'               => User::firstWhere('phone_number', $row['user_number'])->id,
-            'supervisor_id'         => User::firstWhere('phone_number', $row['supervisor_number'])->id,
+            'house_id'              => Filament::getTenant()->id,
+            'user_id'               => User::firstWhere('phone_number', $row['user_number'])?->id,
+            'supervisor_id'         => User::firstWhere('phone_number', $row['supervisor_number'])?->id,
             'osrm_code'             => $row['osrm_code'],
             'employee_code'         => $row['employee_code'],
             'rso_code'              => $row['rso_code'],

@@ -16,30 +16,49 @@ class ListItopupReplaces extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('heroicon-s-plus')->label('Add New'),
+            Actions\CreateAction::make()
+                ->icon('heroicon-s-plus')
+                ->label('Add New')
+                ->successNotificationTitle('New itopup replace request created successfully')
+                ->after(function () {
+                    $this->dispatch('refreshTabs');
+                }),
         ];
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'refreshTabs' => 'refresh',
+        ];
+    }
+
+    public function refresh(): void
+    {
+        // This will force a re-render of the component
+        $this->resetPage();
     }
 
     public function getTabs(): array
     {
-        $today = Carbon::today();
-        $itopupReplace = $this->getModel();
-        $todayReplaceCount = $itopupReplace::whereDate('created_at', $today)->count();
-        $canceledReplaceCount = $itopupReplace::where('status', 'canceled')->count();
-        $allReplaceCount = $itopupReplace::count();
-
         return [
             'Today' => Tab::make()
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereDate('created_at', $today))
-                ->badge($todayReplaceCount),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where([['status','!=','canceled'],['status','!=','complete']])->whereDate('created_at', Carbon::today()))
+                ->badge(function () {
+                    return $this->getModel()::where([['status','!=','canceled'],['status','!=','complete']])->whereDate('created_at', today())->count();
+                }),
 
             'Canceled' => Tab::make()
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('status', 'canceled'))
-                ->badge($canceledReplaceCount),
+                ->badge(function () {
+                    return $this->getModel()::where('status', 'canceled')->count();
+                }),
 
             'ALL' => Tab::make()
                 ->modifyQueryUsing(fn(Builder $query) => $query)
-                ->badge($allReplaceCount),
+                ->badge(function () {
+                    return $this->getModel()::count();
+                }),
         ];
     }
 }

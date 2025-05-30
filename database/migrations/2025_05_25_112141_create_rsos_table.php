@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('slug')->unique();
             $table->foreignIdFor(House::class);
-            $table->foreignIdFor(User::class);
-            $table->foreignIdFor(User::class, 'supervisor_id');
+            $table->foreignIdFor(User::class)->nullable();
+            $table->foreignIdFor(User::class, 'supervisor_id')->nullable();
             $table->string('osrm_code')->unique()->nullable();
             $table->string('employee_code')->unique()->nullable();
             $table->string('rso_code')->unique()->index();

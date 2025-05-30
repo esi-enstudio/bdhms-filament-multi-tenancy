@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class ItopupReplaceResource extends Resource
 {
@@ -98,6 +99,7 @@ class ItopupReplaceResource extends Resource
                 Select::make('status')
                     ->visible(fn(): bool => auth()->user()->hasAnyRole(['super_admin', 'admin']))
                     ->live()
+                    ->default('pending')
                     ->afterStateUpdated(function ($state, Set $set){
                         // When status is set to 'complete', update completed_at to the current datetime
                         if ($state === 'complete') {
@@ -179,7 +181,6 @@ class ItopupReplaceResource extends Resource
                 //
             ])
             ->actions([
-
                 Tables\Actions\Action::make('view_history')
                     ->label('History')
                     ->icon('heroicon-o-clock')
@@ -199,6 +200,7 @@ class ItopupReplaceResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    ExportBulkAction::make()
                 ]),
             ]);
     }
@@ -217,7 +219,7 @@ class ItopupReplaceResource extends Resource
 //            'create' => Pages\CreateItopupReplace::route('/create'),
 //            'edit' => Pages\EditItopupReplace::route('/{record}/edit'),
             'history' => Pages\History::route('/{record}/history'),
-            'data' => Pages\Data::route('/{record}/data'),
+            'data' => Pages\Data::route('/data'),
         ];
     }
 

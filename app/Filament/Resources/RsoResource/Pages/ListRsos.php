@@ -29,11 +29,10 @@ class ListRsos extends ListRecords
                 ->use(RsoImport::class)
                 ->authorize('import_rso')
                 ->validateUsing([
-                    'user_number' => ['required'],
-                    'supervisor_number' => ['required'],
-                    'rso_code' => ['required'],
-                    'itop_number' => ['required'],
-                    'pool_number' => ['required'],
+                    'rso_code'          => ['required'],
+                    'itop_number'       => ['required','digits:11'],
+                    'pool_number'       => ['required','digits:11'],
+                    'personal_number'   => ['required','digits:11'],
                 ])
                 ->sampleExcel(
                     sampleData: [
