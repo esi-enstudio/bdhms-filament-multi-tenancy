@@ -23,7 +23,7 @@ class ListRetailers extends ListRecords
                 ->slideOver()
                 ->color("primary")
                 ->use(RetailerImport::class)
-                ->authorize('import_retailer')
+                ->authorize('import_btn_retailer')
                 ->validateUsing([
                     'rso_number' => ['required'],
                     'retailer_code' => ['required'],

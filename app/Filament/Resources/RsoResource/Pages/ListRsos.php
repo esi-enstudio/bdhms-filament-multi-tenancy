@@ -27,7 +27,7 @@ class ListRsos extends ListRecords
                 ->slideOver()
                 ->color("primary")
                 ->use(RsoImport::class)
-                ->authorize('import_rso')
+                ->authorize('import_btn_rso')
                 ->validateUsing([
                     'rso_code'          => ['required'],
                     'itop_number'       => ['required','digits:11'],

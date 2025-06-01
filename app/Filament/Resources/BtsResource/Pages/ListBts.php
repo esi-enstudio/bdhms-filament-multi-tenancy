@@ -26,7 +26,7 @@ class ListBts extends ListRecords
             ExcelImportAction::make()
                 ->slideOver()
                 ->color("primary")
-                ->authorize('import_bts')
+                ->authorize('import_btn_bts')
                 ->use(BtsImport::class)
                 ->validateUsing([
                     'site_id' => ['required'],

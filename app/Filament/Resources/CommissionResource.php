@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\BpResource\Pages;
-use App\Filament\Resources\BpResource\RelationManagers;
-use App\Models\Bp;
+use App\Filament\Resources\CommissionResource\Pages;
+use App\Filament\Resources\CommissionResource\RelationManagers;
+use App\Models\Commission;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,9 +13,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class BpResource extends Resource
+class CommissionResource extends Resource
 {
-    protected static ?string $model = Bp::class;
+    protected static ?string $model = Commission::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -56,9 +56,9 @@ class BpResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListBps::route('/'),
-//            'create' => Pages\CreateBp::route('/create'),
-//            'edit' => Pages\EditBp::route('/{record}/edit'),
+            'index' => Pages\ListCommissions::route('/'),
+            'create' => Pages\CreateCommission::route('/create'),
+            'edit' => Pages\EditCommission::route('/{record}/edit'),
         ];
     }
 }

@@ -13,7 +13,9 @@ class ListHouses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('heroicon-s-plus')->label('Add New'),
+            Actions\CreateAction::make()
+                ->icon('heroicon-s-plus')
+                ->label('Add New'),
         ];
     }
 }

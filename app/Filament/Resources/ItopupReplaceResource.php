@@ -219,7 +219,6 @@ class ItopupReplaceResource extends Resource
 //            'create' => Pages\CreateItopupReplace::route('/create'),
 //            'edit' => Pages\EditItopupReplace::route('/{record}/edit'),
             'history' => Pages\History::route('/{record}/history'),
-            'data' => Pages\Data::route('/data'),
         ];
     }
 
