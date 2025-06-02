@@ -49,6 +49,7 @@ class UserResource extends Resource
                                 TextInput::make('name')
                                     ->required()
                                     ->maxLength(255),
+
                                 TextInput::make('phone_number')
                                     ->label('Phone Number')
                                     ->required()
@@ -57,6 +58,11 @@ class UserResource extends Resource
                                     ->maxLength(11)
                                     ->rule('digits:11')
                                     ->hint(function (Get $get) {
+                                        // শুধু create পেজে hint দেখানোর জন্য
+                                        if (!str(request()->route()->getName())->contains('.create')) {
+                                            return null;
+                                        }
+
                                         $value = $get('phone_number');
 
                                         if (!$value || strlen($value) !== 11) {
@@ -111,6 +117,7 @@ class UserResource extends Resource
                             ]),
 
                         Forms\Components\Section::make('Roles')
+                            ->visible(fn() => Filament::auth()->user()?->hasAnyRole(['super_admin', 'admin']))
                             ->schema([
                                 Forms\Components\Select::make('roles')
                                     ->label('')
@@ -124,6 +131,7 @@ class UserResource extends Resource
                                 ]),
 
                         Forms\Components\Section::make('Attached Houses')
+                            ->visible(fn() => Filament::auth()->user()?->hasAnyRole(['super_admin', 'admin']))
                             ->schema([
                                 Select::make('houses')
                                     ->relationship('house', 'code') // Make sure a User model has `houses()` relationship

@@ -21,6 +21,7 @@ class ItopupReplace extends Model
         'house_id',
         'user_id',
         'retailer_id',
+        'issue_retailer_code',
         'sim_serial',
         'balance',
         'reason',
@@ -75,5 +76,10 @@ class ItopupReplace extends Model
     public function retailer(): BelongsTo
     {
         return $this->belongsTo(Retailer::class);
+    }
+
+    public function issueRetailer(): BelongsTo
+    {
+        return $this->belongsTo(Retailer::class, 'issue_retailer_code');
     }
 }

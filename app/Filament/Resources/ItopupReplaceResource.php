@@ -39,8 +39,40 @@ class ItopupReplaceResource extends Resource
                 Hidden::make('user_id')
                     ->default(fn () => Auth::id()),
 
+                Select::make('issue_retailer_code')
+                    ->label('Issue Retailer Code')
+                    ->relationship('retailer', 'itop_number', function ($query) {
+                        // Base query: only fetch enabled retailers
+                        $query->select('id', 'code', 'itop_number');
+
+                        // Get the authenticated user
+                        $user = Auth::user();
+
+                        if ($user) {
+                            if ($user->hasRole('rso')) {
+                                $rsoId = Rso::select('id')->firstWhere(['status' => 'active', 'user_id' => $user->id])?->id;
+                                if ($rsoId) {
+                                    $query->where('rso_id', $rsoId);
+                                } else {
+                                    // If no RSO record is found, return no retailers
+                                    $query->whereRaw('1 = 0');
+                                }
+                            }
+                            // If the user has the 'supervisor' role, filter retailers by the logged-in supervisor
+                            elseif ($user->hasRole('supervisor')) {
+                                $query->where('user_id', $user->id);
+                            }
+                        }
+
+                        return $query;
+                    })
+                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->code} - {$record->itop_number}")
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+
                 Select::make('retailer_id')
-                    ->label('Itop Number')
+                    ->label('Replace Itop Number')
                     ->relationship('retailer', 'itop_number', function ($query) {
                         // Base query: only fetch enabled retailers
                         $query->select('id', 'name', 'itop_number');
@@ -86,7 +118,9 @@ class ItopupReplaceResource extends Resource
 
                 Select::make('reason')
                     ->required()
+                    ->default('lost')
                     ->options([
+                        'lost' => 'Lost',
                         'damaged' => 'Damaged',
                         'stolen' => 'Stolen',
                         'retailer_changed' => 'Retailer Changed',

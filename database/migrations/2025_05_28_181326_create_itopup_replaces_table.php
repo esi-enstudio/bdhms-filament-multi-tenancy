@@ -20,9 +20,10 @@ return new class extends Migration
             $table->foreignIdFor(House::class);
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(Retailer::class);
+            $table->foreignIdFor(Retailer::class, 'issue_retailer_code');
             $table->string('sim_serial')->unique();
             $table->string('balance');
-            $table->string('reason');
+            $table->string('reason')->default('lost');
             $table->string('status')->default('pending');
             $table->string('remarks')->nullable();
             $table->timestamp('completed_at')->nullable();
